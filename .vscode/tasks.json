@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Maven: compile store-cloud-sample",
+      "type": "shell",
+      "command": "mvn -q -pl store-cloud-sample -am compile -DskipTests",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "D:\\Software\\java25",
+          "PATH": "D:\\Software\\java25\\bin;${env:PATH}"
+        }
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: compile store-cloud-gateway",
+      "type": "shell",
+      "command": "mvn -q -pl store-cloud-gateway -am compile -DskipTests",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "D:\\Software\\java25",
+          "PATH": "D:\\Software\\java25\\bin;${env:PATH}"
+        }
+      },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

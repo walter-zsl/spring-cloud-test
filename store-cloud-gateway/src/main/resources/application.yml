@@ -1,0 +1,33 @@
+app:
+  id: store-gateway
+
+apollo:
+  meta: http://127.0.0.1:8080
+
+spring:
+  application:
+    name: store-gateway
+  config:
+    import:
+      - optional:apollo://application
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: store-sample
+              uri: lb://store-sample
+              predicates:
+                - Path=/store-sample/**
+              filters:
+                - StripPrefix=1
+          discovery:
+            locator:
+              enabled: false
+              lower-case-service-id: true
+
+server:
+  port: 18080

@@ -1,0 +1,21 @@
+{
+  "java.jdt.ls.java.home": "D:\\Software\\java25",
+  "terminal.integrated.env.windows": {
+    "JAVA_HOME": "D:\\Software\\java25",
+    "PATH": "D:\\Software\\java25\\bin;${env:PATH}"
+  },
+  "editor.codeLens": true,
+  "java.debug.settings.enableRunDebugCodeLens": true,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.maven.enabled": true,
+  "java.import.gradle.enabled": false,
+  "java.server.launchMode": "Standard",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "maven.executable.preferMavenWrapper": false,
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  }
+}

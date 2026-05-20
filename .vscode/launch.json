@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "store-cloud-sample (19080)",
+      "request": "launch",
+      "mainClass": "com.store.cloud.sample.SampleApplication",
+      "projectName": "store-cloud-sample",
+      "cwd": "${workspaceFolder}/store-cloud-sample",
+      "preLaunchTask": "Maven: compile store-cloud-sample",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "java",
+      "name": "store-cloud-gateway (18080)",
+      "request": "launch",
+      "mainClass": "com.store.cloud.gateway.GatewayApplication",
+      "projectName": "store-cloud-gateway",
+      "preLaunchTask": "Maven: compile store-cloud-gateway",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

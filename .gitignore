@@ -1,0 +1,22 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+**/pom.xml.tag
+**/pom.xml.releaseBackup
+**/dependency-reduced-pom.xml
+
+# IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
