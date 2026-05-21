@@ -7,7 +7,7 @@
 ```
 store-cloud/
 ├── pom.xml
-├── store-cloud-core/                # auth + response（契约） + web（错误与安全壳）
+├── store-cloud-core/                # auth + response（契约） + logging（MDC/trace） + web（错误与安全壳）
 ├── store-cloud-gateway/
 ├── store-cloud-service-api/         # 业务域契约聚合（Feign + DTO）
 │   ├── store-cloud-user-api/        # 用户契约
@@ -55,7 +55,7 @@ store-cloud/
 
 ## 核心库 `store-cloud-core`
 
-见 **`store-cloud-core/README.md`**。业务服务按需依赖 **`store-cloud-core-auth`**（JWT、Servlet 安全底座）、**`store-cloud-core-web`**（统一错误 JSON + **`@ControllerAdvice`**，并传递 **`store-cloud-core-response`** 成功外层 `ApiEnvelope` 等）。若某模块仅需 **契约类型**（如纯 Feign/API 且无 Spring MVC），可**只依赖** **`store-cloud-core-response`**。
+见 **`store-cloud-core/README.md`**。业务服务按需依赖 **`store-cloud-core-auth`**（JWT、Servlet 安全底座）、**`store-cloud-core-web`**（统一错误 JSON + **`@ControllerAdvice`**，并传递 **`store-cloud-core-response`** 成功外层 `ApiEnvelope` 等）、可选 **`store-cloud-core-logging`**（SLF4J/MDC、请求 **traceId** 过滤器）。若某模块仅需 **契约类型**（如纯 Feign/API 且无 Spring MVC），可**只依赖** **`store-cloud-core-response`**。
 
 - **`store-cloud-auth`**：左侧仅「用户名口令」链路；**`issue-tokens: true`**（签发）、**`validate-incoming-jwt: false`**（不校验入站 Bearer，避免双线 `SecurityFilterChain`）。
 - **`store-cloud-user`**、**`store-cloud-order`**：**`issue-tokens: false`**、**`validate-incoming-jwt: true`**，OAuth2 Resource Server + 对称 **`JwtDecoder`**。
@@ -69,6 +69,18 @@ store-cloud/
 3. **取 Token**：`POST http://localhost:19082/api/auth/login`（或网关 `POST .../auth/api/auth/login`），Body：`{"username":"demo","password":"demo"}`；响应字段为 **`access_token`**、**`token_type`**、**`expires_in`**（OAuth 2 snake_case）。  
 4. 调订单：`GET http://localhost:19081/api/v1/orders`，Header：`Authorization: Bearer <access_token>`。  
 5. 或经网关：`http://localhost:18080/order/api/v1/orders` 同上 Header。
+
+### IDE：`Maven Dependencies` 指向不存在的 `store-cloud-core-logging-*.jar`（如 Eclipse 964）
+
+**原因**：`store-cloud-order` → **`store-cloud-core-web`** → 传递 **`com.store:store-cloud-core-logging`**。若本地 **`~/.m2`** 中从未安装过该 SNAPSHOT Jar（例如新开仓库或只打开了子模块而从未在根 reactor 编译/安装），IDE 仍会生成指向该路径的 Classpath，从而产生「文件不存在」类错误。
+
+**处理**：
+
+1. 在仓库根目录 **`store-cloud/`** 执行一次安装（任选其一）：  
+   - 仅链路所需：**`mvn install -pl store-cloud-service/store-cloud-order -am -DskipTests`**  
+   - 或全量：**`mvn install -DskipTests`**
+2. Eclipse：**右键对应工程 → Maven → Update Project**（必要时勾选 **Force Update of Snapshots/Releases**）。更稳妥的做法是以根 **`store-cloud/pom.xml`** 导入多模块 Maven 工程；若 Maven 勾选 **Resolve dependencies from Workspace projects**，在已导入 **`store-cloud-core-logging`** 子工程时 Classpath 可走工作区而不仅依赖 **`~/.m2`**。
+3. 若仍报错，删除本地目录 **`~/.m2/repository/com/store/store-cloud-core-logging/`** 后重跑一次上述 **`mvn install`**（少见：损坏的 SNAPSHOT 元数据）。
 
 ### 排障（用户 / 订单起不来而网关正常）
 
@@ -85,6 +97,8 @@ store-cloud/
 
 ## Maven + 较新 JDK
 
+根 **`pom.xml`** 中 **`java.version` 当前为 `25`**，命令行执行 **`mvn install` / `compile`** 时 **`JAVA_HOME` / Maven 所用的 JVM 也需为 JDK 25**；否则会报「不支持发行版本 25」等编译失败，严重时 IDE/M2E 的依赖解析 Classpath 也会出现「构建路径错误」。本地可与 **`.vscode/settings.json`** 中的 **`java.jdt.ls.java.home`** 对齐为同一 JDK 安装路径。
+
 可选：根目录 **`.mvn/jvm.config`** 为 Maven 进程附加 JVM 参数（若报错 `Unrecognized option` 可先**清空该文件**）。全量编译：
 
 ```bash
@@ -96,7 +110,7 @@ mvn -q -pl store-cloud-service-api,store-cloud-service -am compile -DskipTests
 | 要点 | 说明 |
 |------|------|
 | **扫包** | 启动类仅用 `scanBasePackages = com.store.cloud.{auth\|user\|order}`，**不扫描**整块 `com.store.cloud`。 |
-| **core 装配** | `store-cloud-core-auth` 与 **`store-cloud-core-web`** 各有 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。**`store-cloud-core-response`** 仅为 Jar 契约（无自动配置条目）。网关（WebFlux）不引用 **auth/web**。 |
+| **core 装配** | `store-cloud-core-auth`、**`store-cloud-core-logging`** 与 **`store-cloud-core-web`** 各有 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。**`store-cloud-core-response`** 仅为 Jar 契约（无自动配置条目）。网关（WebFlux）不引用 **auth/web/logging**。 |
 | **拆分** | **`store-cloud-core-response`**：**`ApiEnvelope`** 等成功外层（**`com.store.cloud.core.response.api`**）；**`store-cloud-core-web`**：**`ApiErrorResponse` / `@ControllerAdvice`**（**`com.store.cloud.core.web.error`**）；二者均为 Maven 构件，非独立部署的微服务进程。Servlet 应用通常依赖 **`web`**（即同时带上 **response**）。 |
 | **错误 JSON** | 见 **web**：`ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`。**FilterSecurity** 链路 401/403 仍可后续配置 `AuthenticationEntryPoint` **等同形态 JSON**。 |
 | **成功包装** | 见 **response**：`ApiEnvelope`、`PagedPayload`、`PageMeta`。旧式 **`ApiEnvelope.failed`** 仍可兼容；新项目出错建议 **`ApiErrorResponse` + HTTP 状态码**。 |

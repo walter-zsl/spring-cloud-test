@@ -8,7 +8,8 @@ Maven 聚合工程：**`artifactId === store-cloud-core`**，`packaging` 为 `po
 |------|------------|------|
 | **`store-cloud-core-auth/`** | `com.store:store-cloud-core-auth` | JWT（对称 HS256）编解码、Servlet 安全配置、JWT 委派签发器、OAuth2 snake_case 响应体等底座 |
 | **`store-cloud-core-response/`** | `com.store:store-cloud-core-response` | **仅**公共成功外层契约：`ApiEnvelope`、`PagedPayload` 等（`com.store.cloud.core.response.api`）；轻量依赖 Jackson，**无** Spring MVC/Security **`@ControllerAdvice`** |
-| **`store-cloud-core-web/`** | `com.store:store-cloud-core-web` | `ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`（`com.store.cloud.core.web.error`）；**传递依赖** `store-cloud-core-response`，业务 Servlet 应用一般只引 **web** 即可同时具备成功包装 + 统一错误 |
+| **`store-cloud-core-logging/`** | `com.store:store-cloud-core-logging` | **SLF4J / MDC** 约定、Servlet 请求级 **traceId** 过滤器（自动配置）；**不**绑定 Log4j2，实现层用 Boot 默认 **Logback**；网关（WebFlux）勿引 |
+| **`store-cloud-core-web/`** | `com.store:store-cloud-core-web` | `ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`（`com.store.cloud.core.web.error`）；**传递** **`store-cloud-core-response`** + **`store-cloud-core-logging`**；业务 Servlet 应用一般只引 **web** 即可 |
 
 ## 追加新能力的步骤
 

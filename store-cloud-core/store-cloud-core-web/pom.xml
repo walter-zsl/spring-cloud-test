@@ -14,10 +14,15 @@
     <artifactId>store-cloud-core-web</artifactId>
     <name>store-cloud-core-web</name>
     <description>
-        Servlet Web：`ApiErrorResponse`、全局 `@ControllerAdvice`、业务异常枚举；顺带传递依赖 `store-cloud-core-response`（成功包装契约）。
+        Servlet Web：`ApiErrorResponse`、全局 `@ControllerAdvice`、业务异常枚举；传递依赖 **`store-cloud-core-response`**、**`store-cloud-core-logging`**（MDC / trace / 默认日志格式），业务微服务通常只依赖本模块即可同时带上契约 + 日志底座。
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.store</groupId>
             <artifactId>store-cloud-core-response</artifactId>
