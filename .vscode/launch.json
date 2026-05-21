@@ -3,12 +3,43 @@
   "configurations": [
     {
       "type": "java",
-      "name": "store-cloud-sample (19080)",
+      "name": "store-cloud-auth (19082)",
       "request": "launch",
-      "mainClass": "com.store.cloud.sample.SampleApplication",
-      "projectName": "store-cloud-sample",
-      "cwd": "${workspaceFolder}/store-cloud-sample",
-      "preLaunchTask": "Maven: compile store-cloud-sample",
+      "mainClass": "com.store.cloud.auth.AuthServiceApplication",
+      "projectName": "store-cloud-auth",
+      "cwd": "${workspaceFolder}/store-cloud-service/store-cloud-auth",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "preLaunchTask": "Maven: compile workspace (full reactor)",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "java",
+      "name": "store-cloud-user (19080)",
+      "request": "launch",
+      "mainClass": "com.store.cloud.user.UserServiceApplication",
+      "projectName": "store-cloud-user",
+      "cwd": "${workspaceFolder}/store-cloud-service/store-cloud-user",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "preLaunchTask": "Maven: compile workspace (full reactor)",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "java",
+      "name": "store-cloud-order (19081)",
+      "request": "launch",
+      "mainClass": "com.store.cloud.order.OrderServiceApplication",
+      "projectName": "store-cloud-order",
+      "cwd": "${workspaceFolder}/store-cloud-service/store-cloud-order",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "preLaunchTask": "Maven: compile workspace (full reactor)",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
@@ -18,9 +49,29 @@
       "request": "launch",
       "mainClass": "com.store.cloud.gateway.GatewayApplication",
       "projectName": "store-cloud-gateway",
-      "preLaunchTask": "Maven: compile store-cloud-gateway",
+      "cwd": "${workspaceFolder}/store-cloud-gateway",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local"
+      },
+      "preLaunchTask": "Maven: compile workspace (full reactor)",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "网关 + auth + user + order (并行)",
+      "configurations": [
+        "store-cloud-auth (19082)",
+        "store-cloud-user (19080)",
+        "store-cloud-order (19081)",
+        "store-cloud-gateway (18080)"
+      ],
+      "presentation": {
+        "group": "",
+        "order": "parallel"
+      },
+      "stopAll": true
     }
   ]
 }

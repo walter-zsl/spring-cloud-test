@@ -1,17 +1,12 @@
+# 公共配置（全部环境共用）
 app:
   id: store-gateway
 
-apollo:
-  meta: http://127.0.0.1:8080
-  # 直连 Config Service，避免 Eureka 登记的 Docker 内网 IP（如 172.19.x）在宿主机上连不通、长轮询超时
-  config-service: http://127.0.0.1:8080
-
 spring:
+  profiles:
+    default: local
   application:
     name: store-gateway
-  config:
-    import:
-      - optional:apollo://application
   cloud:
     nacos:
       discovery:
@@ -20,10 +15,24 @@ spring:
       server:
         webflux:
           routes:
-            - id: store-sample
-              uri: lb://store-sample
+            # /auth/** → store-cloud-auth（OAuth2/JWT 派发）
+            - id: store-auth-service
+              uri: lb://store-auth-service
               predicates:
-                - Path=/store-sample/**
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+            # 对外前缀 /user/...、/order/...，去掉首段后转发到各服务原有路径
+            - id: store-user-service
+              uri: lb://store-user-service
+              predicates:
+                - Path=/user/**
+              filters:
+                - StripPrefix=1
+            - id: store-order-service
+              uri: lb://store-order-service
+              predicates:
+                - Path=/order/**
               filters:
                 - StripPrefix=1
           discovery:
@@ -33,3 +42,36 @@ spring:
 
 server:
   port: 18080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: store-auth-service
+        url: /auth/v3/api-docs
+      - name: store-user-service
+        url: /user/v3/api-docs
+      - name: store-order-service
+        url: /order/v3/api-docs
+
+---
+# 生产/联 Apollo：SPRING_PROFILES_ACTIVE=prod
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import:
+      - optional:apollo://application
+
+apollo:
+  meta: ${APOLLO_META:http://127.0.0.1:8080}
+  config-service: ${APOLLO_CONFIG_SERVICE:http://127.0.0.1:8080}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -1,0 +1,9 @@
+store:
+  security:
+    jwt:
+      enforce-strong-secret: false
+    bootstrap-users:
+      - username: demo
+        password-encoded: '{noop}demo'
+        roles:
+          - USER

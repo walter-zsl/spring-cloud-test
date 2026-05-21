@@ -1,0 +1,56 @@
+# 订单服务：仅 JWT 校验，无登录与 bootstrap 用户
+app:
+  id: store-order-service
+
+store:
+  security:
+    user-source: custom
+    jwt:
+      secret: ${JWT_SECRET:please-change-this-secret-demo-placeholder-min-length-utf8-abc!!}
+      issue-tokens: false
+      validate-incoming-jwt: true
+      issuer: store-auth-service
+      enforce-strong-secret: true
+
+spring:
+  profiles:
+    default: local
+  application:
+    name: store-order-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        fail-fast: false
+
+server:
+  port: 19081
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import:
+      - optional:apollo://application
+
+store:
+  security:
+    jwt:
+      enforce-strong-secret: true
+
+apollo:
+  meta: ${APOLLO_META:http://127.0.0.1:8080}
+  config-service: ${APOLLO_CONFIG_SERVICE:http://127.0.0.1:8080}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

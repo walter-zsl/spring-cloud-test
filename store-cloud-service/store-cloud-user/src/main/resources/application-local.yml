@@ -1,0 +1,4 @@
+store:
+  security:
+    jwt:
+      enforce-strong-secret: false
