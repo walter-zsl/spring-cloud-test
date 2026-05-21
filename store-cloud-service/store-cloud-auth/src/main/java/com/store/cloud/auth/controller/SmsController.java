@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.store.cloud.auth.api.dto.FetchSmsCodeRequest;
 import com.store.cloud.auth.service.SmsService;
+import com.store.cloud.core.response.api.ApiEnvelope;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,9 +23,9 @@ public class SmsController {
         this.smsService = smsService;
     }
 
-    @Operation(summary = "获取短信验证码", description = "占位：后续接入短信网关；请勿将验证码明文回传生产环境。")
+    @Operation(summary = "获取短信验证码", description = "占位：后续接入短信网关；成功数据为服务端提示文案。")
     @PostMapping(value = "/api/auth/fetch-sms-code", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String fetchSmsCode(@Validated @RequestBody FetchSmsCodeRequest request) {
-        return smsService.sendSmsCode(request.mobile().trim());
+    public ApiEnvelope<String> fetchSmsCode(@Validated @RequestBody FetchSmsCodeRequest request) {
+        return ApiEnvelope.ok(smsService.sendSmsCode(request.mobile().trim()));
     }
 }

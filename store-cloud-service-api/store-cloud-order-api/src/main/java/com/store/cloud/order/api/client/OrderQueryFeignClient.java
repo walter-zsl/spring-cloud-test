@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import com.store.cloud.core.response.api.ApiEnvelope;
 import com.store.cloud.order.api.dto.OrderView;
 
 /**
@@ -15,5 +16,5 @@ import com.store.cloud.order.api.dto.OrderView;
 public interface OrderQueryFeignClient {
 
     @GetMapping
-    List<OrderView> list(@RequestHeader(name = "Authorization", required = false) String authorization);
+    ApiEnvelope<List<OrderView>> list(@RequestHeader(name = "Authorization", required = false) String authorization);
 }

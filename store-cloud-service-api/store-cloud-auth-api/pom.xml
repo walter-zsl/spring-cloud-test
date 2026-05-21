@@ -17,6 +17,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-response</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <optional>true</optional>

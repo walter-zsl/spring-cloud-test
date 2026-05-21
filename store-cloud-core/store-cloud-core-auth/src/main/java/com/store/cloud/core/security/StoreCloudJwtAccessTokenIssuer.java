@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -13,7 +12,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.stereotype.Component;
 
 import com.store.cloud.core.security.oauth2.OAuth2AccessTokenBody;
 
@@ -22,10 +20,8 @@ import com.store.cloud.core.security.oauth2.OAuth2AccessTokenBody;
  * <p>调用方通常为认证中心控制器 / Service（左侧口令校验已由 {@link org.springframework.security.authentication.AuthenticationManager}
  * 与用户体系完成）。
  *
- * @see JwtEncoderServletConfiguration 提供 JwtEncoder Bean
+ * @see JwtEncoderServletConfiguration 注册本类型及 {@link JwtEncoder} Bean（仅 {@code issue-tokens=true} 的 Servlet 应用）。
  */
-@Component
-@ConditionalOnBean(JwtEncoder.class)
 public class StoreCloudJwtAccessTokenIssuer {
 
     private final JwtEncoder jwtEncoder;

@@ -30,6 +30,16 @@ public class JwtEncoderServletConfiguration {
         return NimbusJwtEncoder.withSecretKey(sk).algorithm(MacAlgorithm.HS256).build();
     }
 
+    /**
+     * 由自动配置注册，不依赖业务应用对 {@code com.store.cloud.core} 的组件扫描（认证中心等仅扫描自身包名即可）。
+     */
+    @Bean
+    @ConditionalOnMissingBean(StoreCloudJwtAccessTokenIssuer.class)
+    StoreCloudJwtAccessTokenIssuer storeCloudJwtAccessTokenIssuer(
+            JwtEncoder jwtEncoder, StoreSecurityProperties storeSecurityProperties) {
+        return new StoreCloudJwtAccessTokenIssuer(jwtEncoder, storeSecurityProperties);
+    }
+
     private static SecretKey toSecretKey(String secret) {
         return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }

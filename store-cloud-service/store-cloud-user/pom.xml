@@ -27,6 +27,17 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 控制器直接使用 ApiEnvelope 等契约类型，需显式依赖（与 store-cloud-user-api 一致） -->
+        <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-response</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>

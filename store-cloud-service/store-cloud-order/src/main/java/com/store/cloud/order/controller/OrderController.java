@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.store.cloud.core.response.api.ApiEnvelope;
 import com.store.cloud.order.api.dto.OrderView;
 import com.store.cloud.order.service.OrderService;
 
@@ -27,7 +28,7 @@ public class OrderController {
 
     @Operation(summary = "演示订单列表")
     @GetMapping
-    public List<OrderView> list() {
-        return orderService.listOrders();
+    public ApiEnvelope<List<OrderView>> list() {
+        return ApiEnvelope.ok(orderService.listOrders());
     }
 }

@@ -19,5 +19,7 @@
 
     <modules>
         <module>store-cloud-core-auth</module>
+        <module>store-cloud-core-response</module>
+        <module>store-cloud-core-web</module>
     </modules>
 </project>

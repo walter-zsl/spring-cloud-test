@@ -2,6 +2,13 @@
 
 本项目使用 **[SpringDoc OpenAPI](https://springdoc.org/)**（适配 Spring Boot 4：根 `pom.xml` 中 **`springdoc.version`**）。
 
+## HTTP 响应约定（简要）
+
+| 类型 | 说明 |
+|------|------|
+| **多数 REST** | 成功：`ApiEnvelope<T>`（**`store-cloud-core-response`**）；出错：`ApiErrorResponse`（**`GlobalRestExceptionAdvice`**）。 |
+| **OAuth** | `POST /api/auth/login`、`POST /oauth2/token` 成功仍为 **`OAuth2AccessTokenBody`**（snake_case），**不包** `ApiEnvelope`；失败仍为统一错误 JSON。 |
+
 ## 浏览器访问（local）
 
 | 入口 | URL | 说明 |

@@ -7,7 +7,7 @@
 ```
 store-cloud/
 ├── pom.xml
-├── store-cloud-core/                # 核心库聚合（如 store-cloud-core-auth）
+├── store-cloud-core/                # auth + response（契约） + web（错误与安全壳）
 ├── store-cloud-gateway/
 ├── store-cloud-service-api/         # 业务域契约聚合（Feign + DTO）
 │   ├── store-cloud-user-api/        # 用户契约
@@ -55,7 +55,7 @@ store-cloud/
 
 ## 核心库 `store-cloud-core`
 
-见 **`store-cloud-core/README.md`**。业务服务按需依赖 **`store-cloud-core-auth`**（JWT、Servlet 安全底座）。
+见 **`store-cloud-core/README.md`**。业务服务按需依赖 **`store-cloud-core-auth`**（JWT、Servlet 安全底座）、**`store-cloud-core-web`**（统一错误 JSON + **`@ControllerAdvice`**，并传递 **`store-cloud-core-response`** 成功外层 `ApiEnvelope` 等）。若某模块仅需 **契约类型**（如纯 Feign/API 且无 Spring MVC），可**只依赖** **`store-cloud-core-response`**。
 
 - **`store-cloud-auth`**：左侧仅「用户名口令」链路；**`issue-tokens: true`**（签发）、**`validate-incoming-jwt: false`**（不校验入站 Bearer，避免双线 `SecurityFilterChain`）。
 - **`store-cloud-user`**、**`store-cloud-order`**：**`issue-tokens: false`**、**`validate-incoming-jwt: true`**，OAuth2 Resource Server + 对称 **`JwtDecoder`**。
@@ -90,6 +90,16 @@ store-cloud/
 ```bash
 mvn -q -pl store-cloud-service-api,store-cloud-service -am compile -DskipTests
 ```
+
+## 组件扫描与统一错误响应
+
+| 要点 | 说明 |
+|------|------|
+| **扫包** | 启动类仅用 `scanBasePackages = com.store.cloud.{auth\|user\|order}`，**不扫描**整块 `com.store.cloud`。 |
+| **core 装配** | `store-cloud-core-auth` 与 **`store-cloud-core-web`** 各有 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。**`store-cloud-core-response`** 仅为 Jar 契约（无自动配置条目）。网关（WebFlux）不引用 **auth/web**。 |
+| **拆分** | **`store-cloud-core-response`**：**`ApiEnvelope`** 等成功外层（**`com.store.cloud.core.response.api`**）；**`store-cloud-core-web`**：**`ApiErrorResponse` / `@ControllerAdvice`**（**`com.store.cloud.core.web.error`**）；二者均为 Maven 构件，非独立部署的微服务进程。Servlet 应用通常依赖 **`web`**（即同时带上 **response**）。 |
+| **错误 JSON** | 见 **web**：`ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`。**FilterSecurity** 链路 401/403 仍可后续配置 `AuthenticationEntryPoint` **等同形态 JSON**。 |
+| **成功包装** | 见 **response**：`ApiEnvelope`、`PagedPayload`、`PageMeta`。旧式 **`ApiEnvelope.failed`** 仍可兼容；新项目出错建议 **`ApiErrorResponse` + HTTP 状态码**。 |
 
 ## OpenAPI / Swagger UI
 

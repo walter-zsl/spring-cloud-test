@@ -1,18 +1,17 @@
 package com.store.cloud.auth.service.impl;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.store.cloud.auth.dto.LoginRequest;
 import com.store.cloud.auth.service.AuthService;
 import com.store.cloud.core.security.StoreCloudJwtAccessTokenIssuer;
 import com.store.cloud.core.security.oauth2.OAuth2AccessTokenBody;
+import com.store.cloud.core.web.error.BusinessException;
+import com.store.cloud.core.web.error.ErrorCodes;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -37,10 +36,8 @@ public class AuthServiceImpl implements AuthService {
             Authentication authentication =
                     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
             return jwtAccessTokenIssuer.issue(authentication);
-        } catch (BadCredentialsException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid_grant");
         } catch (AuthenticationException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid_grant");
+            throw new BusinessException(ErrorCodes.STORE_AUTH_INVALID_GRANT, "invalid_grant");
         }
     }
 }

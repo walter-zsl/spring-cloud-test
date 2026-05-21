@@ -27,6 +27,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>

@@ -3,6 +3,8 @@ package com.store.cloud.order.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.store.cloud.core.response.api.ApiEnvelope;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -12,7 +14,7 @@ public class PublicController {
 
     @Operation(summary = "订单服务就绪探测")
     @GetMapping("/api/public/health")
-    public String health() {
-        return "ok";
+    public ApiEnvelope<String> health() {
+        return ApiEnvelope.ok("ok-order");
     }
 }
