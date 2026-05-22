@@ -5,7 +5,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "store.logging")
 public class StoreCloudLoggingProperties {
 
-    /** 是否注册 Servlet 过滤器，为每条请求写入 traceId 至 MDC。 */
+    /**
+     * 是否在未显式配置 {@code logging.structured.format.console} 时，由环境后处理器注入团队默认（JSON + MDC 上下文）。
+     * 关闭后请自行配置 {@code logging.pattern.console} 或 {@code logging.structured.*}。
+     */
+    private boolean structuredConsole = true;
+
+    /** 结构化控制台格式 id（默认 {@code logstash}，便于集中式采集）。 */
+    private String structuredConsoleFormat = "logstash";
+
+    /** 是否注册链路过滤器（Servlet / WebFlux），为每条请求写入 traceId 至 MDC。 */
     private boolean enabled = true;
 
     /** 优先从该 HTTP 头读取上游追踪号（无则自动生成）。 */
@@ -23,6 +32,22 @@ public class StoreCloudLoggingProperties {
      * 响应头名；为空则与 {@link #traceHeader} 一致（通常均为 {@code X-Trace-Id}）。
      */
     private String responseTraceHeader = "";
+
+    public boolean isStructuredConsole() {
+        return structuredConsole;
+    }
+
+    public void setStructuredConsole(boolean structuredConsole) {
+        this.structuredConsole = structuredConsole;
+    }
+
+    public String getStructuredConsoleFormat() {
+        return structuredConsoleFormat;
+    }
+
+    public void setStructuredConsoleFormat(String structuredConsoleFormat) {
+        this.structuredConsoleFormat = structuredConsoleFormat;
+    }
 
     public boolean isEnabled() {
         return enabled;

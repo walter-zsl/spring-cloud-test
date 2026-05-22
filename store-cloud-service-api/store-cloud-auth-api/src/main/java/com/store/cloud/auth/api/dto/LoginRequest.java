@@ -1,7 +1,9 @@
 package com.store.cloud.auth.api.dto;
 
-/**
- * JSON 登录请求体（与 {@code POST /api/auth/login} 对齐）。
- * <p>校验注解放在各服务端实现；本契约模块保持仅数据结构。
- */
-public record LoginRequest(String username, String password) {}
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequest(
+        @NotBlank @Schema(example = "mobile", description = "用户号码") String mobile,
+        @NotBlank @Schema(example = "code", description = "短信验证密码") String code,
+        @NotBlank @Schema(example = "scope", description = "中间件名称") String scope) {}

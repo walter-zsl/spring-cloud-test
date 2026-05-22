@@ -1,0 +1,4 @@
+# Environment post-processors — Spring Boot 4 通过 SpringFactoriesLoader 加载；
+# 仅靠 META-INF/spring/org.springframework.boot.env.EnvironmentPostProcessor（旧路径）时本类可能不会被调用。
+org.springframework.boot.EnvironmentPostProcessor=\
+com.store.cloud.core.logging.autoconfigure.StoreCloudLoggingEnvironmentDefaultsPostProcessor

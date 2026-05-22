@@ -112,7 +112,7 @@ mvn -q -pl store-cloud-service-api,store-cloud-service -am compile -DskipTests
 | 要点 | 说明 |
 |------|------|
 | **扫包** | 启动类仅用 `scanBasePackages = com.store.cloud.{auth\|user\|order}`，**不扫描**整块 `com.store.cloud`。 |
-| **core 装配** | `store-cloud-core-auth`、**`store-cloud-core-logging`** 与 **`store-cloud-core-web`** 各有 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。**`store-cloud-core-response`** 仅为 Jar 契约（无自动配置条目）。网关（WebFlux）不引用 **auth/web/logging**。 |
+| **core 装配** | **`store-cloud-core-auth`**（Servlet JWT）、**`store-cloud-core-logging`**（MDC/trace、控制台 JSON、`AutoConfiguration.imports`）、**`store-cloud-core-web`**（Servlet 全局错误）；**`store-cloud-core-response`** 无 Boot 装配。网关 **不引用 auth/web**，**显式引用 logging**（见 **`store-cloud-gateway`** 与 **`store-cloud-core-logging/README.md`**）。 |
 | **拆分** | **`store-cloud-core-response`**：**`ApiEnvelope`** 等成功外层（**`com.store.cloud.core.response.api`**）；**`store-cloud-core-web`**：**`ApiErrorResponse` / `@ControllerAdvice`**（**`com.store.cloud.core.web.error`**）；二者均为 Maven 构件，非独立部署的微服务进程。Servlet 应用通常依赖 **`web`**（即同时带上 **response**）。 |
 | **错误 JSON** | 见 **web**：`ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`。**FilterSecurity** 链路 401/403 仍可后续配置 `AuthenticationEntryPoint` **等同形态 JSON**。 |
 | **成功包装** | 见 **response**：`ApiEnvelope`、`PagedPayload`、`PageMeta`。成功默认外层 **`code`** 为数字串 **`"20000"`**（与同仓库 **`ErrorCodes`** 成功段对齐）；旧式 **`ApiEnvelope.failed`** 仍可兼容；出错建议 **`ApiErrorResponse`**（ **`code`** 为 JSON 数值，≥ **`40000`** 为错误语义）+ HTTP 状态码。 |

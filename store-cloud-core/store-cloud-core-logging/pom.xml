@@ -14,13 +14,22 @@
     <artifactId>store-cloud-core-logging</artifactId>
     <name>store-cloud-core-logging</name>
     <description>
-        日志底座：SLF4J（MDC 字段约定、追踪标识填充）。实现侧随 Spring Boot 默认 Logback；可选集成 JSON 输出见 README。
+        日志底座：SLF4J（MDC 字段约定、追踪标识填充）、Spring Boot 结构化 JSON 控制台默认、Servlet/WebFlux 链路过滤器。
     </description>
 
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!-- WebFilter / ServerWebExchange：Servlet 与 WebFlux 共用（WebFlux 环境由条件装配注册） -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -3,46 +3,41 @@
 **门面**：SLF4J。  
 **实现**：不强制绑定；随业务应用的 `spring-boot-starter-*` 使用 Boot 默认 **Logback** 即可。
 
-## 与 `store-cloud-core-web` 的关系（不必每个服务手写依赖）
+## 结构化 JSON（集中式日志）
 
-本模块已作为 **`store-cloud-core-web` 的传递依赖**。业务微服务若已依赖 **web**（推荐：统一错误 + 成功契约），则会**自动**带上 **logging**，一般**无需**在业务 `pom.xml` 里再写一遍 `store-cloud-core-logging`。
+classpath 上出现本模块时，`StoreCloudLoggingEnvironmentDefaultsPostProcessor`（在 **`META-INF/spring.factories`** 中注册为 `org.springframework.boot.EnvironmentPostProcessor`）会在**未手写**等价配置的前提下，注入便于 **ELK / Loki / Grafana** 采集的默认值：
 
-仅在不依赖 web、但仍要 MDC 工具类时，才单独依赖本模块。
+| 生效条件 | 行为 |
+|---------|------|
+| `store.logging.apply-default-logging-patterns=true`（默认）且 `store.logging.structured-console=true`（默认） | `logging.structured.format.console=logstash`、`logging.structured.json.context.include=true`，控制台输出 **JSON 行**，并把 **SLF4J MDC（含 traceId）** 纳入上下文字段 |
+| `store.logging.structured-console=false` | 退回团队 **文本**模板（仍含 **`%X{traceId}`**） |
 
-## 全局默认日志格式（可覆盖）
+可自行覆盖：`logging.structured.format.console`（例如 `ecs`）、`logging.structured.ecs.service.*`、`logging.pattern.console` 等；与 Spring Boot **4.x** 官方 **`logging.structured.*`** 一致，**无需**再引 `logstash-logback-encoder`。
 
-类路径上存在本模块时，若未配置 `logging.pattern.console`，会通过
-`StoreCloudLoggingEnvironmentDefaultsPostProcessor` 注入团队统一模板（含 **`%X{traceId}`**）。
-在 `application.yml` 里写上自己的 `logging.pattern.console` 即可完全覆盖。
+## 与 `store-cloud-core-web` 的关系
 
-关闭默认注入（例如由 Apollo 统一下发 pattern）：
-
-```yaml
-store:
-  logging:
-    apply-default-logging-patterns: false
-```
+本模块已作为 **`store-cloud-core-web` 的传递依赖**。业务 Servlet 微服务若已依赖 **web**，一般**无需**在业务 `pom.xml` 里再写 `store-cloud-core-logging`。  
+**网关**：`store-cloud-gateway` **显式依赖**本模块（WebFlux 无 **web**，需单独引用），以获得 JSON 控制台默认与链路过滤器。
 
 ## 能力
 
 | 内容 | 说明 |
 |------|------|
-| `MdcFieldNames` / `TraceMdc` | MDC 键名约定与手写任务链中设置 traceId 的辅助方法 |
-| `TraceIdServletFilter` | （Servlet）从请求头读取或生成 traceId，**写入 MDC**、**响应头回传**，请求结束清理 MDC |
+| `MdcFieldNames` / `TraceMdc` | MDC 键名约定；任务链手写设置 traceId 时的辅助 |
+| `TraceIdServletFilter` | **Servlet**：读/生成链路号 → **MDC**，响应头回传，`FilterOrder` 最高优先级 |
+| `TraceIdReactiveWebFilter` | **WebFlux**（网关）：同上，并把 **`X-Trace-Id`** 写回转发请求头，下游 Servlet 服务可接续同一号 |
 
-自动配置通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册；**仅 Servlet Web** 环境生效，网关（WebFlux）请勿依赖本模块。
+自动配置见 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`：`StoreCloudLoggingAutoConfiguration`（SERVLET）、`StoreCloudReactiveLoggingAutoConfiguration`（REACTIVE）。
 
 ## 分布式链路（X-Trace-Id）
 
-1. **入站**：网关 / 上游调用可带 `X-Trace-Id`（名称可配）；未带则服务生成 32 位十六进制串（无连字符 UUID）。  
-2. **日志**：同一请求内日志通过 MDC 带出 `traceId`（键名可配，与 `%X{traceId}` 对齐）。  
-3. **出站 HTTP**：默认在**响应头**写回同一追踪号（默认头名与入站一致：`X-Trace-Id`），便于浏览器/客户端、下游 Feign 继续**透传**该头，与 ELK 中日志关联。
-
-跨域场景若需在前端 JS 读取响应头，请在网关或服务上配置 `Access-Control-Expose-Headers: X-Trace-Id`（或你自定义的响应头名）。
+1. **入站**：网关 / 上游可带 `X-Trace-Id`（名称可配）；未带则由过滤器生成 **32** 位十六进制串（无连字符 UUID）。  
+2. **日志**：结构化 JSON 中通过 **`logging.structured.json.context.include=true`** 带出 MDC **`traceId`**（键名默认 `traceId`，可配 **`mdc-trace-id-key`**）。  
+3. **响应**：默认在响应头回传同一追踪号；跨域时需 `Access-Control-Expose-Headers` 暴露该头名。
 
 ## 业务模块中引用
 
-仅当**不**使用 `store-cloud-core-web` 时需显式添加：
+不经过 **web** 时显式依赖：
 
 ```xml
 <dependency>
@@ -57,25 +52,20 @@ store:
 ```yaml
 store:
   logging:
+    apply-default-logging-patterns: true   # 关闭则本模块不写任何默认值
+    structured-console: true               # false = 单行文本模板
+    structured-console-format: logstash    # ecs / gelf 等见 Boot 文档
     enabled: true
-    trace-header: X-Trace-Id       # 入站请求头
-    mdc-trace-id-key: traceId    # MDC 键，与 %X{traceId} 一致
-    expose-trace-id-response: true   # 是否在响应头回传（默认 true）
-    response-trace-header: ""      # 响应头名；留空则与 trace-header 相同
+    trace-header: X-Trace-Id
+    mdc-trace-id-key: traceId              # MDC / JSON context 对齐
+    expose-trace-id-response: true
+    response-trace-header: ""               # 空则与 trace-header 相同
 ```
 
-与 Spring Boot 单行日志格式（在业务 `application.yml` 中）：
+仅当 **关闭** 结构化控制台、需要自定义文本行时示例：
 
 ```yaml
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [trace=%X{traceId:-}] - %msg%n"
 ```
-
-## 集中式 JSON 日志（可选）
-
-需要对接 ELK / Loki 时，在**业务应用**中额外添加（版本随仓库统一 BOM 或自行对齐 Logback）：
-
-`net.logstash.logback:logstash-logback-encoder`
-
-再在 Logback 中配置 `LoggingEventCompositeJsonEncoder` 等；本核心模块不重复引入以免与现场版本冲突。

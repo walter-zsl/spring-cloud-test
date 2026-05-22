@@ -35,6 +35,12 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
         </dependency>
+        <!-- JSON 控制台 + WebFlux traceId MDc/下游 X-Trace-Id -->
+        <dependency>
+            <groupId>com.store</groupId>
+            <artifactId>store-cloud-core-logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

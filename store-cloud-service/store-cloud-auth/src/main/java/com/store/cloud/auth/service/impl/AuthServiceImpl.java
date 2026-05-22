@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
-import com.store.cloud.auth.dto.LoginRequest;
+// import com.store.cloud.auth.dto.LoginRequest;
 import com.store.cloud.auth.service.AuthService;
 import com.store.cloud.core.security.StoreCloudJwtAccessTokenIssuer;
 import com.store.cloud.core.security.oauth2.OAuth2AccessTokenBody;
@@ -25,10 +25,10 @@ public class AuthServiceImpl implements AuthService {
         this.jwtAccessTokenIssuer = jwtAccessTokenIssuer;
     }
 
-    @Override
-    public OAuth2AccessTokenBody issuePasswordGrant(LoginRequest request) {
-        return issuePasswordGrant(request.username(), request.password());
-    }
+    // @Override
+    // public OAuth2AccessTokenBody issuePasswordGrant(LoginRequest request) {
+    //     return issuePasswordGrant(request.username(), request.password());
+    // }
 
     @Override
     public OAuth2AccessTokenBody issuePasswordGrant(String username, String password) {

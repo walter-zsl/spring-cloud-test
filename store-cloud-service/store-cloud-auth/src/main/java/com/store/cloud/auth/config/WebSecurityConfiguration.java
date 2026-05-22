@@ -1,5 +1,7 @@
 package com.store.cloud.auth.config;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,11 @@ public class WebSecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 无匹配 Handler 等业务错误会通过 ERROR/FORWARD 进入 /error，须放行否则会误报 403 且无正文
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD)
+                        .permitAll()
+                        .requestMatchers("/error")
+                        .permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/oauth2/token",
