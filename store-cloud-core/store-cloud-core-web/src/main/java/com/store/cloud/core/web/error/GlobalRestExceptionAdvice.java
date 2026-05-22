@@ -44,7 +44,7 @@ public class GlobalRestExceptionAdvice {
         String traceId = traceIdFromMdc();
         log.warn("REST validation failed path={} traceId={} fields={}", path, traceId != null ? traceId : "-", fields);
         ApiErrorResponse body =
-                ApiErrorResponse.of(ErrorCodes.STORE_VALIDATION_FAILED.businessCode(), path, summary, fields, traceId);
+                ApiErrorResponse.of(ErrorCodes.STORE_VALIDATION_FAILED.code(), path, summary, fields, traceId);
         return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(body);
     }
 
@@ -57,10 +57,11 @@ public class GlobalRestExceptionAdvice {
     /** 来自 {@link org.springframework.web.server.ResponseStatusException}。 */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> onResponseStatus(ResponseStatusException ex, HttpServletRequest req) {
-        String reason = ex.getReason() != null ? ex.getReason() : ErrorCodes.STORE_HTTP_STATUS.businessCode();
+        String reason =
+                ex.getReason() != null ? ex.getReason() : ErrorCodes.STORE_HTTP_STATUS.defaultMessage();
         ApiErrorResponse body =
                 ApiErrorResponse.of(
-                        ErrorCodes.STORE_HTTP_STATUS.businessCode(),
+                        ErrorCodes.STORE_HTTP_STATUS.code(),
                         uri(req),
                         reason,
                         null,
@@ -77,7 +78,7 @@ public class GlobalRestExceptionAdvice {
                 ApiErrorResponse.of(
                         ErrorCodes.STORE_FORBIDDEN,
                         uri(req),
-                        ErrorCodes.STORE_FORBIDDEN.businessCode(),
+                        ErrorCodes.STORE_FORBIDDEN.defaultMessage(),
                         traceIdFromMdc());
         return ResponseEntity.status(ErrorCodes.STORE_FORBIDDEN.httpStatus())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +100,7 @@ public class GlobalRestExceptionAdvice {
                 ApiErrorResponse.of(
                         ErrorCodes.STORE_INTERNAL_SERVER_ERROR,
                         uri(req),
-                        ErrorCodes.STORE_INTERNAL_SERVER_ERROR.businessCode(),
+                        ErrorCodes.STORE_INTERNAL_SERVER_ERROR.defaultMessage(),
                         traceId);
         return ResponseEntity.internalServerError().contentType(MediaType.APPLICATION_JSON).body(body);
     }

@@ -70,6 +70,8 @@ store-cloud/
 4. 调订单：`GET http://localhost:19081/api/v1/orders`，Header：`Authorization: Bearer <access_token>`。  
 5. 或经网关：`http://localhost:18080/order/api/v1/orders` 同上 Header。
 
+**开发期自动重启**：可运行模块（网关、auth、user、order）已引入 **`spring-boot-devtools`**。保存源码后需在 IDE 触发编译（或用 **`mvn compile`**），当 **`classpath`（通常为 `target/classes`）发生变化**时会**自动重启进程**（整块应用上下文重建，不等同于 JVMTI 字节码热替换）。**打包成可执行 Jar 时** Boot 插件会**排除 DevTools**，勿将其当作生产运行时能力。
+
 ### IDE：`Maven Dependencies` 指向不存在的 `store-cloud-core-logging-*.jar`（如 Eclipse 964）
 
 **原因**：`store-cloud-order` → **`store-cloud-core-web`** → 传递 **`com.store:store-cloud-core-logging`**。若本地 **`~/.m2`** 中从未安装过该 SNAPSHOT Jar（例如新开仓库或只打开了子模块而从未在根 reactor 编译/安装），IDE 仍会生成指向该路径的 Classpath，从而产生「文件不存在」类错误。
@@ -113,7 +115,7 @@ mvn -q -pl store-cloud-service-api,store-cloud-service -am compile -DskipTests
 | **core 装配** | `store-cloud-core-auth`、**`store-cloud-core-logging`** 与 **`store-cloud-core-web`** 各有 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`。**`store-cloud-core-response`** 仅为 Jar 契约（无自动配置条目）。网关（WebFlux）不引用 **auth/web/logging**。 |
 | **拆分** | **`store-cloud-core-response`**：**`ApiEnvelope`** 等成功外层（**`com.store.cloud.core.response.api`**）；**`store-cloud-core-web`**：**`ApiErrorResponse` / `@ControllerAdvice`**（**`com.store.cloud.core.web.error`**）；二者均为 Maven 构件，非独立部署的微服务进程。Servlet 应用通常依赖 **`web`**（即同时带上 **response**）。 |
 | **错误 JSON** | 见 **web**：`ApiErrorResponse`、`ErrorCodes`、`BusinessException`、`GlobalRestExceptionAdvice`。**FilterSecurity** 链路 401/403 仍可后续配置 `AuthenticationEntryPoint` **等同形态 JSON**。 |
-| **成功包装** | 见 **response**：`ApiEnvelope`、`PagedPayload`、`PageMeta`。旧式 **`ApiEnvelope.failed`** 仍可兼容；新项目出错建议 **`ApiErrorResponse` + HTTP 状态码**。 |
+| **成功包装** | 见 **response**：`ApiEnvelope`、`PagedPayload`、`PageMeta`。成功默认外层 **`code`** 为数字串 **`"20000"`**（与同仓库 **`ErrorCodes`** 成功段对齐）；旧式 **`ApiEnvelope.failed`** 仍可兼容；出错建议 **`ApiErrorResponse`**（ **`code`** 为 JSON 数值，≥ **`40000`** 为错误语义）+ HTTP 状态码。 |
 
 ## OpenAPI / Swagger UI
 

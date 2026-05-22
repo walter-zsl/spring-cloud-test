@@ -81,8 +81,18 @@ public record ApiEnvelope<T>(
             return false;
         }
         String c = code.trim();
-        return ApiEnvelopeConstants.SUCCESS_CODE_REST.equalsIgnoreCase(c)
+        if (ApiEnvelopeConstants.SUCCESS_CODE_REST.equals(c)
                 || ApiEnvelopeConstants.SUCCESS_CODE_LEGACY_ZERO.equals(c)
-                || "200".equals(c);
+                || "200".equals(c)
+                || "OK".equalsIgnoreCase(c)) {
+            return true;
+        }
+        try {
+            int n = Integer.parseUnsignedInt(c.replaceFirst("^\\+", ""));
+            return n >= ApiEnvelopeConstants.SUCCESS_TIER_MIN_INCLUSIVE
+                    && n < ApiEnvelopeConstants.SUCCESS_TIER_ERROR_BOUND_EXCLUSIVE;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

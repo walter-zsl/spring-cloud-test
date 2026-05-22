@@ -9,19 +9,19 @@ public final class BusinessException extends RuntimeException {
     private final HttpStatusCode statusOverride;
 
     public BusinessException(ErrorCodes category, String message) {
-        super(message != null ? message : category.businessCode());
+        super(message != null ? message : category.defaultMessage());
         this.category = category;
         this.statusOverride = category.httpStatus();
     }
 
     public BusinessException(ErrorCodes category, HttpStatusCode statusOverride, String message) {
-        super(message != null ? message : category.businessCode());
+        super(message != null ? message : category.defaultMessage());
         this.category = category;
         this.statusOverride = statusOverride != null ? statusOverride : category.httpStatus();
     }
 
     public BusinessException(ErrorCodes category, Throwable cause) {
-        super(category.businessCode(), cause);
+        super(category.defaultMessage(), cause);
         this.category = category;
         this.statusOverride = category.httpStatus();
     }

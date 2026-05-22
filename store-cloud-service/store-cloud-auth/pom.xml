@@ -55,6 +55,13 @@
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client-config-data</artifactId>
         </dependency>
+        <!-- 开发期：classpath 变更时自动重启；optional 避免对外传递；打成可执行 Jar 时被 Boot 插件排除 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
